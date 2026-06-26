@@ -9,6 +9,10 @@ Then open         http://localhost:5000
 import json
 import os
 
+# Redirect cache directories to /tmp for serverless read-only environments
+os.environ["YFINANCE_CACHE_DIR"] = "/tmp"
+os.environ["MPLCONFIGDIR"] = "/tmp"
+
 from flask import Flask, jsonify, render_template, request
 
 from analysis_engine import run_full_analysis

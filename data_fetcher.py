@@ -6,6 +6,11 @@ and reading / writing the local portfolio CSV.
 """
 
 import os
+
+# Redirect cache directories to /tmp for serverless read-only environments
+os.environ["YFINANCE_CACHE_DIR"] = "/tmp"
+os.environ["MPLCONFIGDIR"] = "/tmp"
+
 import pandas as pd
 import yfinance as yf
 
