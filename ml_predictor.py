@@ -11,9 +11,6 @@ Polynomial Regression (scikit-learn).
 
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.pipeline import make_pipeline
 
 
 def predict_prices(hist_df: pd.DataFrame, days_ahead: int = 30) -> dict:
@@ -52,20 +49,17 @@ def predict_prices(hist_df: pd.DataFrame, days_ahead: int = 30) -> dict:
     # ── Training data: use last 2 years (max 500 rows) ────────────────────
     train_df = df.tail(500).reset_index(drop=True)
 
-    X_train = np.arange(len(train_df)).reshape(-1, 1).astype(float)
+    X_train = np.arange(len(train_df)).astype(float)
     y_train = train_df["Close"].values.astype(float)
 
     # ── Model: degree-2 polynomial regression ────────────────────────────
     # Degree 2 captures long-term trend curvature (e.g., parabolic rallies /
     # corrections) without wildly overfitting like higher degrees do.
-    model = make_pipeline(
-        PolynomialFeatures(degree=2, include_bias=False),
-        LinearRegression()
-    )
-    model.fit(X_train, y_train)
+    coeffs = np.polyfit(X_train, y_train, 2)
+    poly = np.poly1d(coeffs)
 
     # ── Residual standard deviation → confidence band ────────────────────
-    y_fit = model.predict(X_train)
+    y_fit = poly(X_train)
     residuals = y_train - y_fit
     std_resid = float(np.std(residuals))
 
@@ -73,7 +67,7 @@ def predict_prices(hist_df: pd.DataFrame, days_ahead: int = 30) -> dict:
     future_start_idx = len(train_df)
     future_indices = np.arange(
         future_start_idx, future_start_idx + days_ahead
-    ).reshape(-1, 1).astype(float)
+    ).astype(float)
 
     # Generate future trading dates (skip weekends — no Indian holiday check
     # needed at this level of approximation)
@@ -85,7 +79,7 @@ def predict_prices(hist_df: pd.DataFrame, days_ahead: int = 30) -> dict:
         if d.weekday() < 5:          # Mon–Fri
             future_dates.append(d.strftime("%Y-%m-%d"))
 
-    raw_pred = model.predict(future_indices)
+    raw_pred = poly(future_indices)
     pred_prices = np.clip(raw_pred, 0, None)   # prices can't be negative
 
     # Confidence bands: uncertainty grows linearly over the forecast horizon
