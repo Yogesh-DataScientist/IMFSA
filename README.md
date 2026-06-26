@@ -1,4 +1,4 @@
-# IMFSMA - Indian Market Stock Analysis Framework
+# IMFSA - Intelligent Multidimensional Framework For Stock Analysis 
 
 IMFSMA is a local, interactive web application designed for comprehensive stock market analysis, focusing primarily on the Indian market (e.g., NIFTY 50) while also supporting global stocks. It provides a rich dashboard, technical market diagnostics, portfolio tracking, and Machine Learning-powered price predictions.
 
