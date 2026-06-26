@@ -9,11 +9,7 @@ import math
 import numpy as np
 import pandas as pd
 
-try:
-    import pandas_ta as ta
-    PANDAS_TA_AVAILABLE = True
-except ImportError:
-    PANDAS_TA_AVAILABLE = False
+PANDAS_TA_AVAILABLE = False
 
 from data_fetcher import fetch_stock_data, fetch_info
 

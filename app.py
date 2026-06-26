@@ -614,7 +614,7 @@ import os
 import json
 import time
 
-SECTOR_CACHE_FILE_DEFAULT = "sector_cache.json"
+SECTOR_CACHE_FILE_DEFAULT = os.path.join(os.path.dirname(__file__), "sector_cache.json")
 
 if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
     SECTOR_CACHE_FILE = "/tmp/sector_cache.json"
