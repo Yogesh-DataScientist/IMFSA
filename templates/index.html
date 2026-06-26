@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="IMFSMA – Indian Market Fundamental Stock Market Analysis. Get precise BUY, HOLD, or SELL signals powered by a 100-point hybrid fundamental + technical decision engine." />
+  <title>IMFSA — An Intelligent Multidimensional Framework For Stock Analysis</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <!-- Plotly CDN -->
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+  <!-- jsPDF & autotable JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+
+<body>
+
+  <!-- Dot grid background overlay -->
+  <div class="bg-grid"></div>
+
+  <!-- ═══════════════ NAVBAR ═══════════════ -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="logo-icon">📈</span>
+      IMFSA
+    </div>
+
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-page="dashboard">Dashboard</button>
+      <button class="nav-tab" data-page="analyzer">Stock Analyzer</button>
+      <button class="nav-tab" data-page="news">Market News</button>
+      <button class="nav-tab" data-page="portfolio">Portfolio</button>
+      <button class="nav-tab" data-page="history">History</button>
+    </div>
+
+    <div class="nav-right">
+      <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Day / Night Mode">🌙 Night</button>
+      <span class="nav-time">IST <span id="live-time">—</span></span>
+    </div>
+  </nav>
+
+  <!-- Mobile nav tabs -->
+  <div class="mobile-tabs">
+    <button class="nav-tab mobile-tab active" data-page="dashboard">🏠 Dashboard</button>
+    <button class="nav-tab mobile-tab" data-page="analyzer">🔍 Analyzer</button>
+    <button class="nav-tab mobile-tab" data-page="news">📰 News</button>
+    <button class="nav-tab mobile-tab" data-page="portfolio">💼 Portfolio</button>
+    <button class="nav-tab mobile-tab" data-page="history">📋 History</button>
+  </div>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <main>
+
+    <!-- ──────────────────────────────────
+       PAGE 1 — DASHBOARD
+  ────────────────────────────────── -->
+    <section class="page active" id="page-dashboard">
+      <div class="section-title">Market Dashboard</div>
+      <p class="section-subtitle">Live overview of major Indian indices</p>
+
+      <!-- Index metric cards -->
+      <div class="metrics-grid">
+        <div class="metric-card" id="metric-nifty">
+          <div class="loader-wrap">
+            <div class="spinner"></div>
+          </div>
+        </div>
+        <div class="metric-card" id="metric-sensex">
+          <div class="loader-wrap">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sector Heatmap -->
+      <div class="card sector-heatmap-card" style="margin-bottom:1.5rem;">
+        <div class="card-body">
+          <div class="chart-header">
+            <h3>Sector Performance Heatmap</h3>
+            <span class="heatmap-subtitle">Daily % change — NSE sectoral indices</span>
+          </div>
+          <div id="sector-heatmap-grid">
+            <!-- Skeleton tiles shown while loading -->
+            <div class="heatmap-tile skel-tile"></div>
+            <div class="heatmap-tile skel-tile"></div>
+            <div class="heatmap-tile skel-tile"></div>
+            <div class="heatmap-tile skel-tile"></div>
+            <div class="heatmap-tile skel-tile"></div>
+            <div class="heatmap-tile skel-tile"></div>
+            <div class="heatmap-tile skel-tile"></div>
+            <div class="heatmap-tile skel-tile"></div>
+            <div class="heatmap-tile skel-tile"></div>
+            <div class="heatmap-tile skel-tile"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main candlestick chart -->
+      <div class="card chart-card">
+        <div class="card-body">
+          <div class="chart-header">
+            <h3>Index Price Chart</h3>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+              <!-- Index selector -->
+              <div class="index-selector" style="display:flex;gap:5px;">
+                <button class="idx-btn active" data-symbol="^NSEI">NIFTY 50</button>
+                <button class="idx-btn" data-symbol="^BSESN">SENSEX</button>
+              </div>
+              <!-- Period selector -->
+              <div class="chart-controls">
+                <button class="period-btn" data-period="1mo">1M</button>
+                <button class="period-btn active" data-period="6mo">6M</button>
+                <button class="period-btn" data-period="1y">1Y</button>
+                <button class="period-btn" data-period="5y">5Y</button>
+              </div>
+            </div>
+          </div>
+          <div id="dash-chart">
+            <div class="loader-wrap">
+              <div class="spinner"></div><span class="loader-text">Loading…</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Movers -->
+      <div class="movers-grid">
+        <!-- Gainers panel -->
+        <div class="card movers-panel gainers">
+          <div class="movers-header">
+            <div class="movers-header-icon">📈</div>
+            <div>
+              <div class="movers-title">Top Gainers</div>
+              <div class="movers-subtitle">Best performing NIFTY stocks today</div>
+            </div>
+          </div>
+          <div class="movers-divider"></div>
+          <div id="gainers-list">
+            <div class="mover-skeleton">
+              <div class="skel skel-rank"></div>
+              <div class="skel-main">
+                <div class="skel skel-title"></div>
+                <div class="skel skel-sub"></div>
+              </div>
+              <div class="skel skel-pill"></div>
+            </div>
+            <div class="mover-skeleton">
+              <div class="skel skel-rank"></div>
+              <div class="skel-main">
+                <div class="skel skel-title"></div>
+                <div class="skel skel-sub"></div>
+              </div>
+              <div class="skel skel-pill"></div>
+            </div>
+            <div class="mover-skeleton">
+              <div class="skel skel-rank"></div>
+              <div class="skel-main">
+                <div class="skel skel-title"></div>
+                <div class="skel skel-sub"></div>
+              </div>
+              <div class="skel skel-pill"></div>
+            </div>
+            <div class="mover-skeleton">
+              <div class="skel skel-rank"></div>
+              <div class="skel-main">
+                <div class="skel skel-title"></div>
+                <div class="skel skel-sub"></div>
+              </div>
+              <div class="skel skel-pill"></div>
+            </div>
+            <div class="mover-skeleton">
+              <div class="skel skel-rank"></div>
+              <div class="skel-main">
+                <div class="skel skel-title"></div>
+                <div class="skel skel-sub"></div>
+              </div>
+              <div class="skel skel-pill"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Losers panel -->
+        <div class="card movers-panel losers">
+          <div class="movers-header">
+            <div class="movers-header-icon">📉</div>
+            <div>
+              <div class="movers-title">Top Losers</div>
+              <div class="movers-subtitle">Worst performing NIFTY stocks today</div>
+            </div>
+          </div>
+          <div class="movers-divider"></div>
+          <div id="losers-list">
+            <div class="mover-skeleton">
+              <div class="skel skel-rank"></div>
+              <div class="skel-main">
+                <div class="skel skel-title"></div>
+                <div class="skel skel-sub"></div>
+              </div>
+              <div class="skel skel-pill"></div>
+            </div>
+            <div class="mover-skeleton">
+              <div class="skel skel-rank"></div>
+              <div class="skel-main">
+                <div class="skel skel-title"></div>
+                <div class="skel skel-sub"></div>
+              </div>
+              <div class="skel skel-pill"></div>
+            </div>
+            <div class="mover-skeleton">
+              <div class="skel skel-rank"></div>
+              <div class="skel-main">
+                <div class="skel skel-title"></div>
+                <div class="skel skel-sub"></div>
+              </div>
+              <div class="skel skel-pill"></div>
+            </div>
+            <div class="mover-skeleton">
+              <div class="skel skel-rank"></div>
+              <div class="skel-main">
+                <div class="skel skel-title"></div>
+                <div class="skel skel-sub"></div>
+              </div>
+              <div class="skel skel-pill"></div>
+            </div>
+            <div class="mover-skeleton">
+              <div class="skel skel-rank"></div>
+              <div class="skel-main">
+                <div class="skel skel-title"></div>
+                <div class="skel skel-sub"></div>
+              </div>
+              <div class="skel skel-pill"></div>
+            </div>
+          </div>
+      </div>
+
+      <!-- Info banner -->
+      <div class="info-banner">
+        ℹ️&nbsp; Data is fetched live from Yahoo Finance via <code>yfinance</code>.
+        Market hours: NSE / BSE — Mon–Fri, 09:15 – 15:30 IST.
+      </div>
+    </section>
+
+    <!-- ──────────────────────────────────
+       PAGE 1.5 — MARKET NEWS
+    ────────────────────────────────── -->
+    <section class="page" id="page-news">
+      <div class="section-title">Market News</div>
+      <p class="section-subtitle">Latest business and stock market updates</p>
+
+      <div class="card market-news-card" style="margin-top:1.5rem; margin-bottom:1.5rem;">
+        <div class="card-body">
+          <div id="market-news-list" class="news-grid">
+            <div class="loader-wrap">
+              <div class="spinner"></div><span class="loader-text">Loading market news…</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ──────────────────────────────────
+       PAGE 2 — STOCK ANALYZER
+  ────────────────────────────────── -->
+    <section class="page" id="page-analyzer">
+      <div class="section-title">IMFSA Stock Analyzer</div>
+      <p class="section-subtitle">Enter an NSE/BSE ticker to get a 100-point BUY / HOLD / SELL recommendation</p>
+
+      <!-- Search bar -->
+      <div class="search-section">
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input id="ticker-input" class="search-input" type="text"
+            placeholder="e.g. TCS.NS, RELIANCE.NS, INFY.NS, HDFCBANK.NS" autocomplete="off" spellcheck="false" />
+        </div>
+        <button id="analyze-btn" class="btn-primary">Analyze →</button>
+      </div>
+
+      <!-- Quick chips -->
+      <div class="quick-picks">
+        <span class="quick-label">Quick picks:</span>
+        <button class="quick-chip" onclick="quickPick('TCS.NS')">TCS</button>
+        <button class="quick-chip" onclick="quickPick('RELIANCE.NS')">RELIANCE</button>
+        <button class="quick-chip" onclick="quickPick('INFY.NS')">INFOSYS</button>
+        <button class="quick-chip" onclick="quickPick('HDFCBANK.NS')">HDFC BANK</button>
+        <button class="quick-chip" onclick="quickPick('ITC.NS')">ITC</button>
+        <button class="quick-chip" onclick="quickPick('ICICIBANK.NS')">ICICI BANK</button>
+        <button class="quick-chip" onclick="quickPick('WIPRO.NS')">WIPRO</button>
+      </div>
+
+      <!-- Results area -->
+      <div id="analyzer-result">
+        <div class="empty-state">
+          <div class="empty-icon">📊</div>
+          <p>Enter a ticker symbol above and click <strong>Analyze</strong><br>to generate an IMFSMA 100-point
+            recommendation.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ──────────────────────────────────
+       PAGE 3 — PORTFOLIO MANAGER
+  ────────────────────────────────── -->
+    <section class="page" id="page-portfolio">
+      <div class="section-title">Portfolio Manager</div>
+      <p class="section-subtitle">Track your mock holdings with live P&amp;L calculations</p>
+
+      <div class="history-actions" style="margin-bottom:1.5rem;">
+        <button class="btn-secondary" onclick="exportData('portfolio', 'csv')">📄 Export CSV</button>
+        <button class="btn-secondary" onclick="exportData('portfolio', 'pdf')">📋 Export PDF</button>
+      </div>
+
+      <!-- Add holding form -->
+      <form id="portfolio-form" class="add-form">
+        <div class="form-group">
+          <label class="form-label" for="p-ticker">Ticker Symbol</label>
+          <input id="p-ticker" class="form-input" type="text" placeholder="e.g. TCS.NS" required autocomplete="off"
+            spellcheck="false" style="text-transform:uppercase" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="p-units">Units / Qty</label>
+          <input id="p-units" class="form-input" type="number" placeholder="10" min="0.01" step="0.01" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="p-buyprice">Buy Price (₹)</label>
+          <input id="p-buyprice" class="form-input" type="number" placeholder="3500.00" min="0.01" step="0.01"
+            required />
+        </div>
+        <button type="submit" class="btn-primary">+ Add</button>
+      </form>
+
+      <!-- Summary cards -->
+      <div class="portfolio-summary" id="portfolio-summary">
+        <div class="summary-card-sm">
+          <div class="label">Total Invested</div>
+          <div class="value" style="color:var(--text-muted)">—</div>
+        </div>
+        <div class="summary-card-sm">
+          <div class="label">Current Value</div>
+          <div class="value" style="color:var(--text-muted)">—</div>
+        </div>
+        <div class="summary-card-sm">
+          <div class="label">Total P&amp;L</div>
+          <div class="value" style="color:var(--text-muted)">—</div>
+        </div>
+        <div class="summary-card-sm">
+          <div class="label">Overall Return</div>
+          <div class="value" style="color:var(--text-muted)">—</div>
+        </div>
+      </div>
+
+      <!-- Advanced Portfolio Dashboards -->
+      <div id="adv-portfolio-dash" style="display:none; margin-bottom:1.5rem;">
+
+        <div class="adv-grid">
+          <!-- Today's Gain Card -->
+          <div class="card adv-card">
+            <div class="adv-card-title">TODAY'S GAIN</div>
+            <div class="adv-card-body">
+              <div class="adv-donut-section">
+                <div id="donut-today" class="donut-chart-box"></div>
+                <div class="donut-legend">
+                  <div class="legend-item"><span class="dot green"></span> <span id="tg-gain-count">—</span></div>
+                  <div class="legend-val green" id="tg-gain-val">—</div>
+                  <div class="legend-item mt-2"><span class="dot red"></span> <span id="tg-lose-count">—</span></div>
+                  <div class="legend-val red" id="tg-lose-val">—</div>
+                </div>
+              </div>
+              <div class="adv-lists">
+                <div class="adv-list-col">
+                  <div class="list-title">GAINING STOCKS</div>
+                  <div id="list-gaining"></div>
+                </div>
+                <div class="adv-list-col">
+                  <div class="list-title">LOSING STOCKS</div>
+                  <div id="list-losing"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unrealized Gain Card -->
+          <div class="card adv-card">
+            <div class="adv-card-title">UNREALIZED GAIN</div>
+            <div class="adv-card-body">
+              <div class="adv-donut-section">
+                <div id="donut-unrealized" class="donut-chart-box"></div>
+                <div class="donut-legend">
+                  <div class="legend-item"><span class="dot green"></span> <span id="ug-profit-count">—</span></div>
+                  <div class="legend-val green" id="ug-profit-val">—</div>
+                  <div class="legend-item mt-2"><span class="dot red"></span> <span id="ug-loss-count">—</span></div>
+                  <div class="legend-val red" id="ug-loss-val">—</div>
+                </div>
+              </div>
+              <div class="adv-lists">
+                <div class="adv-list-col">
+                  <div class="list-title">HIGHEST PROFIT</div>
+                  <div id="list-profit"></div>
+                </div>
+                <div class="adv-list-col">
+                  <div class="list-title">HIGHEST LOSS</div>
+                  <div id="list-loss"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Portfolio Score Card -->
+        <div class="card score-card" style="margin-top:1.5rem;">
+          <div class="adv-card-title">PORTFOLIO SCORE</div>
+          <div class="score-card-body">
+            <div id="donut-score" class="score-donut-box"></div>
+            <div class="score-metrics-wrap">
+              <div class="score-metric">
+                <div class="score-val green"><span id="sc-quality">—</span><small>/100</small></div>
+                <div class="score-label">Quality Score</div>
+              </div>
+              <div class="score-metric">
+                <div class="score-val yellow"><span id="sc-momentum">—</span><small>/100</small></div>
+                <div class="score-label">Momentum Score</div>
+              </div>
+              <div class="score-metric">
+                <div class="score-val orange"><span id="sc-diversification">—</span><small>/100</small></div>
+                <div class="score-label">Diversification Score</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Holdings table -->
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-body">
+          <div class="card-title">Holdings</div>
+          <div id="portfolio-table-wrap">
+            <div class="empty-state">
+              <div class="empty-icon">📂</div>
+              <p>No holdings yet. Add a stock above to get started.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pie chart -->
+      <div class="card">
+        <div class="card-body">
+          <div class="card-title">Portfolio Distribution</div>
+          <div id="portfolio-pie"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ──────────────────────────────────
+       PAGE 4 — ANALYSIS HISTORY
+  ────────────────────────────────── -->
+    <section class="page" id="page-history">
+      <div class="section-title">Analysis History</div>
+      <p class="section-subtitle">A log of every stock recommendation generated by IMFSA</p>
+
+      <!-- Stats row -->
+      <div class="history-stats" id="history-stats">
+        <div class="summary-card-sm">
+          <div class="label">Total Analyses</div>
+          <div class="value" id="hist-total">—</div>
+        </div>
+        <div class="summary-card-sm">
+          <div class="label">BUY Signals</div>
+          <div class="value pnl-pos" id="hist-buy">—</div>
+        </div>
+        <div class="summary-card-sm">
+          <div class="label">HOLD Signals</div>
+          <div class="value" style="color:var(--yellow)" id="hist-hold">—</div>
+        </div>
+        <div class="summary-card-sm">
+          <div class="label">SELL Signals</div>
+          <div class="value pnl-neg" id="hist-sell">—</div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="history-actions">
+        <button id="history-refresh-btn" class="btn-secondary" onclick="loadHistory()">🔄 Refresh</button>
+        <button class="btn-secondary" onclick="exportData('history', 'csv')">📄 Export CSV</button>
+        <button class="btn-secondary" onclick="exportData('history', 'pdf')">📋 Export PDF</button>
+        <button id="history-clear-btn" class="btn-danger" onclick="clearHistory()">🗑 Clear History</button>
+      </div>
+
+      <!-- Main table card -->
+      <div class="card">
+        <div class="card-body">
+          <div class="card-title">Recommendation Log</div>
+          <div id="history-table-wrap">
+            <div class="loader-wrap">
+              <div class="spinner"></div><span class="loader-text">Loading history…</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ──────────────────────────────────
+       FLOATING AI ASSISTANT CHAT WIDGET
+  ────────────────────────────────── -->
+    <button class="chat-toggle-btn" id="chat-toggle-btn">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+      <span>Ask AI</span>
+    </button>
+    <div class="chat-widget" id="chat-widget">
+      <div class="chat-header">
+        <div class="chat-title">
+          <span class="chat-icon">✨</span>
+          IMFSA AI Assistant
+        </div>
+        <button class="chat-close" id="chat-close-btn">&times;</button>
+      </div>
+      <div class="chat-body" id="chat-body">
+        <div class="chat-message bot">
+          <div class="msg-content">Hello! I'm your AI quantitative analyst. Ask me about your portfolio, technical
+            indicators, or Indian stock market queries.</div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="chat-input" placeholder="Ask anything about stocks..." autocomplete="off"
+          spellcheck="false" />
+        <button id="chat-send-btn">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="/static/main.js"></script>
+  <script>
+    // Quick pick helper — calls the globally exposed runAnalysis from main.js
+    function quickPick(ticker) {
+      document.getElementById('ticker-input').value = ticker;
+      if (typeof window.runAnalysis === 'function') window.runAnalysis();
+    }
+  </script>
+  <!-- Dynamic UI Animations (particles, ripple, counters, cursor glow) -->
+  <script src="/static/animations.js"></script>
+
+</body>
+
+</html>
