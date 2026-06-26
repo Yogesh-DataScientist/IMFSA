@@ -368,7 +368,7 @@ def api_chat():
             except Exception:
                 pass
     if not api_key:
-        api_key = "AIzaSyCCIw-5UFBLsSQVfC6hZSOmUG5j5dID8-I"
+        api_key = ""
     
     system_instruction = "You are the IMFSMA AI Assistant, an expert quantitative analyst tool for the Indian Stock Market built into the IMFSMA application. Keep your answers concise, professional, and easily readable."
     
