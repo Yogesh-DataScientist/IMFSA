@@ -23,7 +23,11 @@ from data_fetcher import (
     add_history_entry,
 )
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder=os.path.join(os.path.dirname(__file__), "templates"),
+    static_folder=os.path.join(os.path.dirname(__file__), "static")
+)
 BASE_DIR = os.path.dirname(__file__)
 
 

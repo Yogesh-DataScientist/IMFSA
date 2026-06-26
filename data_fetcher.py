@@ -69,7 +69,7 @@ def fetch_stock_data(ticker: str, period: str = "1y", interval: str = "1d") -> p
     return hist[["Date", "Open", "High", "Low", "Close", "Volume"]]
 
 
-def fetch_current_price(ticker: str) -> float | None:
+def fetch_current_price(ticker: str):
     """Return the latest closing price for a ticker, or None on failure."""
     try:
         t = yf.Ticker(ticker)
